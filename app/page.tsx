@@ -9,7 +9,7 @@ const Home = () => {
     <ConfigProvider locale={enUS}>
       <div className="flex flex-col items-center">
         <AppHeader />
-        <div className="flex flex-col w-96">
+        <div className="flex flex-col w-[600px]">
           <AppActionRow />
           <TodoList />
         </div>
