@@ -2,9 +2,9 @@
 
 import { Button, message, Modal } from 'antd'
 import { useContext, useRef, useState } from 'react'
-import TodoItemNew from '@/app/components/todo-item-form'
+import TodoItemNew from '@/app/components/todoItemForm'
 import { Todo } from '@/app/interfaces/todo'
-import { RefreshContext } from '@/app/components/refresh-provider'
+import { RefreshContext } from '@/app/components/refreshProvider'
 
 const AppActionRow = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)

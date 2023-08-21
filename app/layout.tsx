@@ -2,6 +2,9 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import StyledComponentsRegistry from '@/app/lib/AntdRegistry'
+import enUS from 'antd/locale/en_US'
+import { ConfigProvider } from 'antd'
+import { RefreshProvider } from '@/app/components/refreshProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,7 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className}>
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <ConfigProvider locale={enUS}>
+          <RefreshProvider>
+            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+          </RefreshProvider>
+        </ConfigProvider>
       </body>
     </html>
   )

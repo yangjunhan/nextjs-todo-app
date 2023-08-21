@@ -3,8 +3,8 @@
 import { List } from 'antd'
 import { Todo } from '@/app/interfaces/todo'
 import { useContext, useEffect, useState } from 'react'
-import { RefreshContext } from '@/app/components/refresh-provider'
-import { TodoItem } from '@/app/components/todo-item'
+import { RefreshContext } from '@/app/components/refreshProvider'
+import { TodoItem } from '@/app/components/todoItem'
 
 const TodoList = () => {
   const [loading, setLoading] = useState<boolean>(true)

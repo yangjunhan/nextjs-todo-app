@@ -2,8 +2,8 @@ import { FC, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Todo } from '@/app/interfaces/todo'
 import { Avatar, Button, message, Modal, Popconfirm, Space } from 'antd'
 import { CheckOutlined, DeleteFilled, EditFilled } from '@ant-design/icons'
-import { RefreshContext } from '@/app/components/refresh-provider'
-import TodoItemNew from '@/app/components/todo-item-form'
+import { RefreshContext } from '@/app/components/refreshProvider'
+import TodoItemNew from '@/app/components/todoItemForm'
 
 export const TodoItem: FC<{ item: Todo.Item }> = ({ item }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
