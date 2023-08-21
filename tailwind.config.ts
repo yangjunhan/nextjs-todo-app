@@ -8,9 +8,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
+      animation: {
+        'pop-out': 'scale 0.15s ease-in-out'
+      },
+      colors: {
+        success: '#52c41a'
+      },
+      keyframes: {
+        scale: {
+          '0%': { transform: 'scale(0)' },
+          '100%': { transform: 'rotate(1)' }
+        }
       }
     }
   },

@@ -3,17 +3,20 @@ import AppActionRow from '@/app/components/app-action-row'
 import TodoList from '@/app/components/todo-list'
 import { ConfigProvider } from 'antd'
 import enUS from 'antd/locale/en_US'
+import { RefreshProvider } from '@/app/components/refresh-provider'
 
 const Home = () => {
   return (
     <ConfigProvider locale={enUS}>
-      <div className="flex flex-col items-center">
-        <AppHeader />
-        <div className="flex flex-col w-[600px]">
-          <AppActionRow />
-          <TodoList />
+      <RefreshProvider>
+        <div className="flex flex-col items-center">
+          <AppHeader />
+          <div className="flex flex-col w-[600px]">
+            <AppActionRow />
+            <TodoList />
+          </div>
         </div>
-      </div>
+      </RefreshProvider>
     </ConfigProvider>
   )
 }

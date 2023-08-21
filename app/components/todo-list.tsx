@@ -1,46 +1,37 @@
 'use client'
 
-import { Avatar, Button, List, Space } from 'antd'
+import { List } from 'antd'
 import { Todo } from '@/app/interfaces/todo'
-import { BellOutlined, DeleteFilled, EditFilled } from '@ant-design/icons'
-import ItemStatus = Todo.ItemStatus
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { RefreshContext } from '@/app/components/refresh-provider'
+import { TodoItem } from '@/app/components/todo-item'
 
 const TodoList = () => {
+  const [loading, setLoading] = useState<boolean>(true)
   const [items, setItems] = useState<Todo.Item[]>([])
+  const { refresh } = useContext(RefreshContext)
+
+  const getTodoList = (): Todo.Item[] => {
+    const storage = window.localStorage.getItem(Todo.StorageKey)
+    return storage ? JSON.parse(storage) : []
+  }
 
   useEffect(() => {
-    setItems([
-      {
-        title: 'Do exercise in the morning',
-        status: ItemStatus.INCOMPLETE,
-        createdTime: 1692330569940
-      }
-    ])
-  }, [])
+    // sort todo items based on descending created time
+    const list = getTodoList().sort((pre, cur) => cur.createdTime - pre.createdTime)
+    setItems(list)
+    setLoading(false)
+  }, [refresh])
 
   return (
     <List
       bordered
       size="large"
       dataSource={items}
+      loading={loading}
       renderItem={item => (
         <List.Item key={item.title}>
-          <div className="flex items-center w-full">
-            <div className="mr-4">
-              <Avatar icon={<BellOutlined />} />
-            </div>
-            <div className="flex flex-auto flex-col overflow-hidden mr-4">
-              <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap">{item.title}</span>
-              <span className="text-xs text-gray-500">{new Date(item.createdTime).toLocaleString()}</span>
-            </div>
-            <div className="flex-initial">
-              <Space>
-                <Button icon={<EditFilled />} />
-                <Button icon={<DeleteFilled />} />
-              </Space>
-            </div>
-          </div>
+          <TodoItem item={item} />
         </List.Item>
       )}
     />
