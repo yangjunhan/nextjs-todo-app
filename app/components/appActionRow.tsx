@@ -1,16 +1,20 @@
 'use client'
 
-import { Button, message, Modal } from 'antd'
-import { useContext, useRef, useState } from 'react'
+import { Button, message, Modal, notification } from 'antd'
+import { FC, useCallback, useContext, useRef, useState } from 'react'
 import TodoItemNew from '@/app/components/todoItemForm'
 import { Todo } from '@/app/interfaces/todo'
 import { RefreshContext } from '@/app/components/refreshProvider'
+import { Session } from '@supabase/gotrue-js'
+import { supabaseClient } from '@/app/lib/SupabaseClient'
 
-const AppActionRow = () => {
+const AppActionRow: FC<{ session: Session }> = ({ session }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [messageApi, contextHolder] = message.useMessage()
+  const [messageApi, messageContextHolder] = message.useMessage()
+  const [api, notificationContextHolder] = notification.useNotification()
   const { triggerRefresh } = useContext(RefreshContext)
   const title = useRef<string>('')
+  const user = session.user
 
   const setTitle = (t: string): void => {
     title.current = t
@@ -20,39 +24,39 @@ const AppActionRow = () => {
     setIsModalOpen(true)
   }
 
-  const addItemToTodoList = (): void => {
-    if (title.current) {
-      const storage = window.localStorage.getItem(Todo.StorageKey)
-      const list: Todo.Item[] = storage ? JSON.parse(storage) : []
-      const now = new Date().valueOf()
-      list.unshift({
-        id: now.toString(),
-        title: title.current,
-        status: Todo.ItemStatus.INCOMPLETE,
-        createdTime: now
-      })
-      window.localStorage.setItem(Todo.StorageKey, JSON.stringify(list))
-      triggerRefresh()
-    }
-  }
-
-  const handleOk = () => {
-    if (!title.current) {
-      messageApi.warning('TODO title cannot be empty.').then()
-      return
-    }
-    messageApi.success('TODO item successfully added.').then()
-    addItemToTodoList()
-    setIsModalOpen(false)
-  }
-
   const handleCancel = () => {
     setIsModalOpen(false)
   }
 
+  const handleOk = useCallback(() => {
+    const titleTrim = title.current.trim()
+    if (!titleTrim.length) {
+      messageApi.warning('TODO title cannot be empty.').then()
+      return
+    }
+    const addItemToTodoList = async () => {
+      const { data: item, error } = await supabaseClient
+        .from('todos')
+        .insert([{ title: titleTrim, status: Todo.ItemStatus.INCOMPLETE, userId: user.id }])
+        .select()
+        .single()
+
+      if (error) {
+        api.error({ message: 'Failed to add todo item', description: error.message })
+      } else if (item) {
+        messageApi.success('TODO item successfully added.').then()
+        triggerRefresh()
+      }
+    }
+
+    addItemToTodoList().then()
+    setIsModalOpen(false)
+  }, [api, messageApi, triggerRefresh, user.id])
+
   return (
     <>
-      {contextHolder}
+      {notificationContextHolder}
+      {messageContextHolder}
       <div className="flex justify-between mb-4">
         <Button type="primary" onClick={showModal}>
           Add TODO

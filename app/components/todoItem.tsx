@@ -1,14 +1,16 @@
 import { FC, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Todo } from '@/app/interfaces/todo'
-import { Avatar, Button, message, Modal, Popconfirm, Space } from 'antd'
+import { Avatar, Button, message, Modal, notification, Popconfirm, Space } from 'antd'
 import { CheckOutlined, DeleteFilled, EditFilled } from '@ant-design/icons'
 import { RefreshContext } from '@/app/components/refreshProvider'
 import TodoItemNew from '@/app/components/todoItemForm'
+import { supabaseClient } from '@/app/lib/SupabaseClient'
 
 export const TodoItem: FC<{ item: Todo.Item }> = ({ item }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [status, setStatus] = useState<Todo.ItemStatus>(item.status)
-  const [messageApi, contextHolder] = message.useMessage()
+  const [messageApi, messageContextHolder] = message.useMessage()
+  const [api, notificationContextHolder] = notification.useNotification()
   const title = useRef<string>(item.title)
   const { triggerRefresh } = useContext(RefreshContext)
 
@@ -28,37 +30,30 @@ export const TodoItem: FC<{ item: Todo.Item }> = ({ item }) => {
     }
   }
 
-  const updateTodoItem = useCallback((): void => {
-    const storage = window.localStorage.getItem(Todo.StorageKey)
-    const list: Todo.Item[] = storage ? JSON.parse(storage) : []
-    const match = list.findIndex(el => el.id === item.id)
-    if (match > -1) {
-      list.splice(match, 1, { ...item, title: title.current, status })
-      window.localStorage.setItem(Todo.StorageKey, JSON.stringify(list))
-    }
-  }, [item, status])
-
-  const deleteTodoItem = (): void => {
-    const storage = window.localStorage.getItem(Todo.StorageKey)
-    const list: Todo.Item[] = storage ? JSON.parse(storage) : []
-    const match = list.findIndex(el => el.id === item.id)
-    if (match > -1) {
-      list.splice(match, 1)
-      window.localStorage.setItem(Todo.StorageKey, JSON.stringify(list))
+  const deleteTodoItem = useCallback(async () => {
+    try {
+      await supabaseClient.from('todos').delete().eq('id', item.id).throwOnError()
       triggerRefresh()
+    } catch (e: any) {
+      api.error({ message: 'Failed to delete todo item', description: e.message })
     }
-  }
+  }, [api, item.id, triggerRefresh])
 
-  const handleOk = useCallback((): void => {
-    if (!title.current) {
+  const handleOk = useCallback(async () => {
+    const titleTrim = title.current.trim()
+    if (!titleTrim.length) {
       messageApi.warning('TODO title cannot be empty.').then()
       return
     }
-    updateTodoItem()
-    triggerRefresh()
-    messageApi.success('TODO item successfully added.').then()
-    setIsModalOpen(false)
-  }, [messageApi, triggerRefresh, updateTodoItem])
+    try {
+      await supabaseClient.from('todos').update({ title: titleTrim }).eq('id', item.id)
+      messageApi.success('TODO item successfully updated.').then()
+      triggerRefresh()
+      setIsModalOpen(false)
+    } catch (e: any) {
+      api.error({ message: "Failed to update todo item's title", description: e.message })
+    }
+  }, [api, item.id, messageApi, triggerRefresh])
 
   const handleCancel = () => {
     setIsModalOpen(false)
@@ -66,12 +61,21 @@ export const TodoItem: FC<{ item: Todo.Item }> = ({ item }) => {
 
   useEffect(() => {
     // listen to status change and update the item
-    updateTodoItem()
-  }, [status, updateTodoItem])
+    const updateItemStatus = async () => {
+      try {
+        await supabaseClient.from('todos').update({ status }).eq('id', item.id)
+        setIsModalOpen(false)
+      } catch (e: any) {
+        api.error({ message: "Failed to update todo item's status", description: e.message })
+      }
+    }
+    updateItemStatus().then()
+  }, [api, item.id, messageApi, status])
 
   return (
     <>
-      {contextHolder}
+      {notificationContextHolder}
+      {messageContextHolder}
       <div className="flex items-center w-full">
         <div className="mr-4 cursor-pointer" onClick={toggleItemStatus}>
           {status === Todo.ItemStatus.COMPLETE ? (
@@ -92,7 +96,7 @@ export const TodoItem: FC<{ item: Todo.Item }> = ({ item }) => {
           ) : (
             <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap">{item.title}</span>
           )}
-          <span className="text-xs text-gray-500">Created: {new Date(item.createdTime).toLocaleString()}</span>
+          <span className="text-xs text-gray-500">Created: {new Date(item.createdAt).toLocaleString()}</span>
         </div>
         <div className="flex-initial">
           <Space>
