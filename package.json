@@ -27,6 +27,7 @@
     "typescript": "5.1.6"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "encoding": "^0.1.13",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

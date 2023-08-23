@@ -9,6 +9,7 @@ import { Session } from '@supabase/gotrue-js'
 import enUS from 'antd/locale/en_US'
 import { ConfigProvider } from 'antd'
 import Auth from '@/app/components/auth'
+import theme from '@/app/theme/default'
 
 const Home = () => {
   const [session, setSession] = useState<Session | null>(null)
@@ -24,9 +25,9 @@ const Home = () => {
   }, [])
 
   return (
-    <ConfigProvider locale={enUS}>
-      <div className="flex flex-col items-center">
-        <AppHeader />
+    <ConfigProvider locale={enUS} theme={theme}>
+      <div className="flex flex-col items-center h-screen">
+        <AppHeader session={session} />
         <div className="flex flex-col w-[600px]">
           {session ? (
             <>

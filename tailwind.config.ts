@@ -15,7 +15,8 @@ const config: Config = {
         'pop-out': 'scale 0.15s ease-in-out'
       },
       colors: {
-        success: '#52c41a'
+        success: '#52c41a',
+        primary: '#6200ee'
       },
       keyframes: {
         scale: {
