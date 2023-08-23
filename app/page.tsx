@@ -6,10 +6,9 @@ import TodoList from '@/app/components/todoList'
 import { supabaseClient } from '@/app/lib/SupabaseClient'
 import { useEffect, useState } from 'react'
 import { Session } from '@supabase/gotrue-js'
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
 import enUS from 'antd/locale/en_US'
 import { ConfigProvider } from 'antd'
+import Auth from '@/app/components/auth'
 
 const Home = () => {
   const [session, setSession] = useState<Session | null>(null)
@@ -35,13 +34,7 @@ const Home = () => {
               <TodoList session={session} />
             </>
           ) : (
-            <Auth
-              supabaseClient={supabaseClient}
-              view="magic_link"
-              appearance={{ theme: ThemeSupa }}
-              showLinks={false}
-              providers={[]}
-            />
+            <Auth supabaseClient={supabaseClient} />
           )}
         </div>
       </div>
