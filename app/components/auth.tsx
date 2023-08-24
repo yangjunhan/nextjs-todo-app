@@ -13,7 +13,14 @@ const Auth: FC<{ supabaseClient: SupabaseClient }> = ({ supabaseClient }) => {
       event.preventDefault()
 
       setLoading(true)
-      const { error } = await supabaseClient.auth.signInWithOtp({ email })
+      const redirectUrl =
+        process.env.NODE_ENV === 'production' ? 'https://nextjs-todo-app-liard-one.vercel.app' : 'http://localhost:3000'
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      })
 
       if (error) {
         api.error({ message: 'Failed to send magic link', description: error.message })
