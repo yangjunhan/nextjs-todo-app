@@ -6,6 +6,14 @@ const nextConfig = {
       use: ['@svgr/webpack']
     })
     return config
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/:path*',
+        destination: '/'
+      }
+    ]
   }
 }
 
